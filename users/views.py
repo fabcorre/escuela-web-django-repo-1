@@ -15,8 +15,9 @@ random.seed()
 
 def user_register(request):
     if request.method == 'POST':
-        form = UserRegistrationForm(resquest.POST)
+        form = UserRegistrationForm(request.POST)
 	if form.is_valid():
+            del(form.cleaned_data['passwordr'])
 	    user = User(**form.cleaned_data)
 	    user.set_password(form.cleaned_data['password'])
 	    user.is_active = False
@@ -28,10 +29,10 @@ def user_register(request):
 
             token = md5(str(random.random())).hexdigest()
 	    encoded = '%s|%s' % (token, user.email)
-	    encoded = base64.b64encoded(encoded)
+	    encoded = base64.b64encode(encoded)
 
 	    rp = RegistrationProfile(user=user, token=token, encoded=encoded)
-	    rp = save()
+	    rp.save()
 
 	    message = 'click aqui: http://127.0.0.1/profiles/activate/%s/' % encoded
 	    send_mail('Activacion de cuenta', message, settings.EMAIL_HOST_USER,[user.email])
